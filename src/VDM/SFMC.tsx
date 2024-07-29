@@ -9,8 +9,8 @@ import { CustomRadio, CustomSelect } from "../form";
 const schema: RJSFSchema = {
   definitions: {
     mappings: {
-      title: "Mappings",
       type: "array",
+      title: "Mappings",
       items: {
         type: "object",
         properties: {
@@ -25,20 +25,135 @@ const schema: RJSFSchema = {
         },
       },
     },
-    objectAction: {
-      title: "What do you want to do?",
-      type: "string",
-      oneOf: [
+    objects: {
+      type: "object",
+      title: "Marketing Cloud Objects",
+      properties: {
+        object: {
+          type: "string",
+          oneOf: [
+            {
+              const: "contacts",
+              title: "Contacts",
+            },
+            {
+              const: "users",
+              title: "Users",
+            },
+          ],
+        },
+      },
+      allOf: [
         {
-          const: "create",
-          title: "Create Audience",
+          if: {
+            properties: {
+              object: {
+                const: "contacts",
+              },
+            },
+            required: ["object"],
+          },
+          then: {
+            properties: {
+              syncMode: {
+                title: "Sync Mode",
+                type: "string",
+                oneOf: [
+                  {
+                    const: "upsert",
+                    title: "Upsert",
+                  },
+                ],
+              },
+              mappings: {
+                allOf: [
+                  {
+                    $ref: "#/definitions/mappings",
+                  },
+                  {
+                    items: {
+                      properties: {
+                        to: {
+                          type: "string",
+                          title: "Destination Field",
+                          oneOf: [
+                            {
+                              const: "email",
+                              title: "Email",
+                            },
+                            {
+                              const: "phone",
+                              title: "Phone",
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
         },
         {
-          const: "select",
-          title: "Use Existing Audience",
+          if: {
+            properties: {
+              object: {
+                const: "users",
+              },
+            },
+            required: ["object"],
+          },
+          then: {
+            properties: {
+              syncMode: {
+                title: "Sync Mode",
+                type: "string",
+                oneOf: [
+                  {
+                    const: "upsert",
+                    title: "Upsert",
+                  },
+                  {
+                    const: "mirror",
+                    title: "Mirror",
+                  },
+                ],
+              },
+              mappings: {
+                allOf: [
+                  {
+                    $ref: "#/definitions/mappings",
+                  },
+                  {
+                    items: {
+                      properties: {
+                        to: {
+                          type: "string",
+                          title: "Destination Field",
+                          oneOf: [
+                            {
+                              const: "firstName",
+                              title: "First Name",
+                            },
+                            {
+                              const: "lastName",
+                              title: "Last Name",
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
         },
       ],
     },
+    journeys: {},
+    dataExtensions: {},
   },
   type: "object",
   properties: {
@@ -74,9 +189,8 @@ const schema: RJSFSchema = {
       then: {
         type: "object",
         properties: {
-          object: {
-            type: "string",
-            title: "Objects",
+          objects: {
+            $ref: "#/definitions/objects",
           },
         },
       },
@@ -85,20 +199,34 @@ const schema: RJSFSchema = {
       if: {
         properties: {
           objectType: {
-            const: "Audience",
-          },
-          objectAction: {
-            const: "select",
+            const: "journeys",
           },
         },
-        required: ["objectAction"],
+        required: ["objectType"],
       },
       then: {
         type: "object",
         properties: {
-          audienceId: {
-            type: "string",
-            title: "Audiences",
+          journeys: {
+            $ref: "#/definitions/journeys",
+          },
+        },
+      },
+    },
+    {
+      if: {
+        properties: {
+          objectType: {
+            const: "dataExtensions",
+          },
+        },
+        required: ["objectType"],
+      },
+      then: {
+        type: "object",
+        properties: {
+          dataExtensions: {
+            $ref: "#/definitions/dataExtensions",
           },
         },
       },
@@ -121,6 +249,19 @@ const uiSchema: UiSchema = {
   //   ],
   objectType: {
     "ui:widget": "radio",
+  },
+  objects: {
+    "ui:order": ["object", "syncMode", "mappings"],
+    object: {
+      "ui:widget": "select",
+      "ui:options": {
+        label: false,
+        placeholder: "Select Object",
+      },
+    },
+    syncMode: {
+      "ui:widget": "radio",
+    },
   },
   objectAction: {
     "ui:widget": "radio",
@@ -161,7 +302,11 @@ const uiSchema: UiSchema = {
 export function SFMCVDM() {
   const [formData, setFormData] = useState({} as any);
   const onChange = (e: IChangeEvent) => {
-    setFormData(e.formData);
+    if (e.formData.objectType !== formData.objectType) {
+      setFormData({ objectType: e.formData.objectType });
+    } else {
+      setFormData(e.formData);
+    }
   };
   return (
     <div className="app">

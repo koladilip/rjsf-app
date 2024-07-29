@@ -6,6 +6,7 @@ import { Mappings } from "./Mappings";
 import { VDM } from "./VDM";
 import { FacebookVDM } from "./VDM/Facebook";
 import { SFMCVDM } from "./VDM/SFMC";
+import { MultiForm } from "./MultiForm";
 
 export const router = createHashRouter([
   {
@@ -19,6 +20,10 @@ export const router = createHashRouter([
   {
     path: "/tabs",
     element: <TabsExample />,
+  },
+  {
+    path: "/multi",
+    element: <MultiForm />,
   },
   {
     path: "/dynamic-select",

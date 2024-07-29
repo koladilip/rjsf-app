@@ -160,7 +160,11 @@ const uiSchema: UiSchema = {
 export function FacebookVDM() {
   const [formData, setFormData] = useState({} as any);
   const onChange = (e: IChangeEvent) => {
-    setFormData(e.formData);
+    if (e.formData.objectType !== formData.objectType) {
+      setFormData({ objectType: e.formData.objectType });
+    } else {
+      setFormData(e.formData);
+    }
   };
   return (
     <div className="app">
