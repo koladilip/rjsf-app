@@ -7,6 +7,7 @@ import { VDM } from "./VDM";
 import { FacebookVDM } from "./VDM/Facebook";
 import { SFMCVDM } from "./VDM/SFMC";
 import { MultiForm } from "./MultiForm";
+import { CustomHideForm } from "./CustomHideForm";
 
 export const router = createHashRouter([
   {
@@ -20,6 +21,10 @@ export const router = createHashRouter([
   {
     path: "/tabs",
     element: <TabsExample />,
+  },
+  {
+    path: "/hide",
+    element: <CustomHideForm />,
   },
   {
     path: "/multi",

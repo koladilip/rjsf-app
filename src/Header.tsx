@@ -15,6 +15,9 @@ export function Header() {
             <Link to="/tabs">Tabs</Link>
           </li>
           <li>
+            <Link to="/hide">Custom Hide</Link>
+          </li>
+          <li>
             <Link to="/multi">Multiple Forms</Link>
           </li>
           <li>
